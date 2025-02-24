@@ -1,7 +1,11 @@
 const mongoose = require("mongoose")
 const Document = require("./schemas/Document")
+require("dotenv").config();
 
-mongoose.connect('mongodb://127.0.0.1/share-note');
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("✅ Connected to MongoDB Atlas"))
+    .catch(err => console.error("❌ MongoDB Connection Error:", err));
+
 
 const io = require('socket.io')(3001, {
     cors: {
@@ -20,7 +24,7 @@ io.on("connection", socket => {
             socket.broadcast.to(documentId).emit("receive-changes", delta)
         })
 
-        socket.on("save-document", async document => {
+        socket.on("save-document", async data => {
             await Document.findByIdAndUpdate(documentId, { data })
         })
     })
