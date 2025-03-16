@@ -1,24 +1,25 @@
+const express = require("express")
+const http = require("http")
+const { Server } = require("socket.io")
 const mongoose = require("mongoose")
 const Document = require("./schemas/Document")
 require("dotenv").config();
 
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ Connected to MongoDB Atlas"))
-    .catch(err => console.error("❌ MongoDB Connection Error:", err));
-
+const app = express()
 const PORT = process.env.PORT || 3001
-const server = require('http').createServer()
 
-const io = require('socket.io')(server, {
+app.get('/', (req, res) => {
+    res.send('Server is running');
+});
+
+const server = http.createServer(app)
+
+const io = new Server(server, {
     cors: {
         origin: process.env.CLIENT_URL || 'http://localhost:5173',
         methods: ['GET', 'POST']
     }
 })
-
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
 
 io.on("connection", socket => {
     socket.on('get-document', async documentId => {
@@ -45,6 +46,15 @@ io.on("connection", socket => {
         }
     })
 })
+
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log("✅ Connected to MongoDB Atlas"))
+    .catch(err => console.error("❌ MongoDB Connection Error:", err));
+
 
 const defaultValue = ""
 
