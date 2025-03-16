@@ -6,13 +6,19 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ Connected to MongoDB Atlas"))
     .catch(err => console.error("❌ MongoDB Connection Error:", err));
 
+const PORT = process.env.PORT || 3001
+const server = require('http').createServer()
 
-const io = require('socket.io')(3001, {
+const io = require('socket.io')(server, {
     cors: {
-        origin: 'http://localhost:5173',
+        origin: process.env.CLIENT_URL || 'http://localhost:5173',
         methods: ['GET', 'POST']
     }
 })
+
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 
 io.on("connection", socket => {
     socket.on('get-document', async documentId => {
